@@ -1,0 +1,677 @@
+<!-- Chosen Palette: Earth & Innovation (Warm Neutrals) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optify - Operations & Management Portal</title>
+    <!-- Chart.js for Results Visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4da6ff;
+            --primary-dark: #3182ce;
+            --bg-neutral: #f4f7f6;
+            --sidebar-bg: #1a2a3a;
+            --text-main: #333;
+            --text-muted: #718096;
+            --card-border: #edf2f7;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-neutral);
+            color: var(--text-main);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: row;
+            min-height: 100vh;
+            background-color: #ffffff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        aside {
+            width: 300px;
+            background-color: var(--sidebar-bg);
+            color: #ffffff;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .brand-name {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+            color: var(--primary);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: #a0aec0;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
+
+        aside p {
+            margin-top: 30px;
+            line-height: 1.6;
+            color: #cbd5e0;
+            font-size: 0.95rem;
+        }
+
+        main {
+            flex-grow: 1;
+            padding: 40px;
+            position: relative;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.3s ease-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-wrapper {
+            text-align: center;
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .events-header {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--sidebar-bg);
+            border-bottom: 4px solid var(--primary);
+            display: inline-block;
+            padding-bottom: 8px;
+            margin: 0;
+        }
+
+        .operations-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border: 2px solid var(--card-border);
+            border-radius: 12px;
+            padding: 30px;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary);
+        }
+
+        .card-icon {
+            width: 44px;
+            height: 44px;
+            background-color: #ebf8ff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #3182ce;
+            font-size: 1.2rem;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3748;
+            line-height: 1.3;
+        }
+
+        .card-status {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+
+        .results-footer {
+            margin-top: 50px;
+            text-align: center;
+            padding-top: 30px;
+            border-top: 2px solid var(--card-border);
+        }
+
+        .btn-result {
+            background-color: var(--primary);
+            color: white;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .btn-result:hover {
+            background-color: var(--primary-dark);
+            transform: scale(1.02);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .chart-container {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .chart-container h3 {
+            margin-top: 0;
+            color: #2d3748;
+            font-size: 1rem;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .total-badge {
+            display: inline-block;
+            background: var(--sidebar-bg);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        /* Polling/Modal Styles */
+        .polling-container { text-align: center; max-width: 100%; margin: 0 auto; }
+        .judge-badge {
+            display: inline-block; background: #ebf8ff; color: #3182ce;
+            padding: 4px 12px; border-radius: 20px; font-weight: bold;
+            font-size: 0.8rem; margin-bottom: 15px; text-transform: uppercase;
+        }
+        .polling-title { font-size: 1.8rem; color: var(--sidebar-bg); margin: 0 0 5px 0; }
+        .polling-subtitle { font-size: 1.3rem; color: var(--text-muted); margin-bottom: 30px; font-weight: 300; }
+        
+        .criteria-row {
+            display: flex; flex-direction: column; align-items: flex-start;
+            margin-bottom: 20px; background: #f8fafc; padding: 20px; border-radius: 12px;
+            gap: 15px;
+        }
+        
+        .criteria-label { font-weight: 600; font-size: 1.1rem; }
+        
+        .rating-group { 
+            display: flex; 
+            justify-content: space-between; 
+            width: 100%;
+            gap: 10px; 
+        }
+        
+        .rating-box {
+            flex: 1;
+            aspect-ratio: 1;
+            max-width: 50px;
+            border: 2px solid #cbd5e0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            font-weight: bold;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+        
+        .rating-box.selected { 
+            background-color: var(--primary); 
+            border-color: var(--primary); 
+            color: white; 
+            transform: scale(1.1);
+        }
+
+        .teacher-display { margin-top: 30px; font-size: 1rem; color: #4a5568; font-style: italic; }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); display: none;
+            justify-content: center; align-items: flex-end; z-index: 1000;
+        }
+
+        .modal-content { 
+            background: white; 
+            width: 100%; 
+            max-width: 500px; 
+            padding: 30px; 
+            border-radius: 20px 20px 0 0; 
+            position: relative;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .close-modal-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 2rem; color: #a0aec0; cursor: pointer; }
+        .form-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { font-weight: 600; color: #4a5568; }
+        .form-group input, .form-group select { padding: 14px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 1rem; }
+        
+        .btn-submit { 
+            background-color: var(--sidebar-bg); 
+            color: white; 
+            padding: 16px 40px; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: 600;
+            width: 100%;
+            font-size: 1.1rem;
+        }
+        
+        .btn-back { 
+            background: white; 
+            border: 1px solid #cbd5e0; 
+            padding: 10px 18px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        #notification {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 400px; padding: 16px 20px;
+            border-radius: 12px; color: white; display: none; z-index: 9999;
+            text-align: center; font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .loading-overlay {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 900px) {
+            .container { flex-direction: column; }
+            aside { width: 100%; padding: 30px; box-sizing: border-box; text-align: center; }
+            .brand-name { font-size: 2.5rem; }
+            .section-title { font-size: 1.2rem; }
+            aside p { display: none; } /* Hide descriptive text on mobile to save space */
+            main { padding: 25px; }
+            .operations-grid, .results-grid { grid-template-columns: 1fr; }
+            .modal-content { border-radius: 20px 20px 0 0; }
+        }
+
+        @media (min-width: 901px) {
+            .modal-overlay { align-items: center; }
+            .modal-content { border-radius: 12px; }
+            .criteria-row { flex-direction: row; align-items: center; }
+            .rating-group { width: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="notification"></div>
+
+    <div class="container">
+        <aside>
+            <div class="brand-name">Optify</div>
+            <div class="section-title">Operations</div>
+            <p>Strategic scoring and evaluation portal optimized for real-time field reporting and management tracking.</p>
+        </aside>
+
+        <main>
+            <!-- Dashboard View -->
+            <div id="dashboardView" class="view active">
+                <div class="header-wrapper"><h1 class="events-header">Events</h1></div>
+                <div class="operations-grid">
+                    <div class="card" onclick="openTeacherModal('Quality Management')">
+                        <div>
+                            <div class="card-icon">Q</div>
+                            <div class="card-title">Quality <br> Management</div>
+                        </div>
+                        <div class="card-status">Standard Protocol</div>
+                    </div>
+                    <div class="card" onclick="openTeacherModal('New Product Development')">
+                        <div>
+                            <div class="card-icon">P</div>
+                            <div class="card-title">New Product <br> Development</div>
+                        </div>
+                        <div class="card-status">Innovation Cycle</div>
+                    </div>
+                    <div class="card" onclick="openTeacherModal('Supply Chain Management')">
+                        <div>
+                            <div class="card-icon">S</div>
+                            <div class="card-title">Supply Chain <br> Management</div>
+                        </div>
+                        <div class="card-status">Logistics Evaluation</div>
+                    </div>
+                    <div class="card" onclick="openTeacherModal('Location Strategy')">
+                        <div>
+                            <div class="card-icon">L</div>
+                            <div class="card-title">Location <br> Strategy</div>
+                        </div>
+                        <div class="card-status">Infrastructure Review</div>
+                    </div>
+                </div>
+
+                <div class="results-footer">
+                    <button class="btn-result" onclick="handleViewResults()">View Results Portfolio</button>
+                </div>
+            </div>
+
+            <!-- Polling View -->
+            <div id="pollingView" class="view">
+                <button class="btn-back" onclick="showDashboard()">← Back</button>
+                <div class="polling-container">
+                    <div id="displayJudgeBadge" class="judge-badge">Judge 1</div>
+                    <h1 id="displayEvent" class="polling-title">Event Name</h1>
+                    <h3 class="polling-subtitle">Scoring Session</h3>
+
+                    <div class="criteria-row">
+                        <span class="criteria-label">1. Technical Execution</span>
+                        <div class="rating-group" id="crit1">
+                            <div class="rating-box" onclick="setRating('crit1', 1)">1</div>
+                            <div class="rating-box" onclick="setRating('crit1', 2)">2</div>
+                            <div class="rating-box" onclick="setRating('crit1', 3)">3</div>
+                            <div class="rating-box" onclick="setRating('crit1', 4)">4</div>
+                            <div class="rating-box" onclick="setRating('crit1', 5)">5</div>
+                        </div>
+                    </div>
+
+                    <div class="criteria-row">
+                        <span class="criteria-label">2. Innovative Design</span>
+                        <div class="rating-group" id="crit2">
+                            <div class="rating-box" onclick="setRating('crit2', 1)">1</div>
+                            <div class="rating-box" onclick="setRating('crit2', 2)">2</div>
+                            <div class="rating-box" onclick="setRating('crit2', 3)">3</div>
+                            <div class="rating-box" onclick="setRating('crit2', 4)">4</div>
+                            <div class="rating-box" onclick="setRating('crit2', 5)">5</div>
+                        </div>
+                    </div>
+
+                    <div class="criteria-row">
+                        <span class="criteria-label">3. Market Feasibility</span>
+                        <div class="rating-group" id="crit3">
+                            <div class="rating-box" onclick="setRating('crit3', 1)">1</div>
+                            <div class="rating-box" onclick="setRating('crit3', 2)">2</div>
+                            <div class="rating-box" onclick="setRating('crit3', 3)">3</div>
+                            <div class="rating-box" onclick="setRating('crit3', 4)">4</div>
+                            <div class="rating-box" onclick="setRating('crit3', 5)">5</div>
+                        </div>
+                    </div>
+
+                    <div class="submit-container" style="margin-top: 30px;">
+                        <button id="submitScoresBtn" class="btn-submit" onclick="finishPolling()">Submit Final Scores</button>
+                    </div>
+
+                    <div id="displayTeacher" class="teacher-display">Teacher Name</div>
+                </div>
+            </div>
+
+            <!-- Results View -->
+            <div id="resultsView" class="view">
+                <button class="btn-back" onclick="showDashboard()">← Back to Events</button>
+                <div class="header-wrapper"><h1 class="events-header">Results Portfolio</h1></div>
+                
+                <div id="resultsLoader" class="loading-overlay">
+                    <p>Syncing with cloud matrix...</p>
+                </div>
+
+                <div id="resultsContent" class="results-grid" style="display:none;">
+                    <div class="chart-container">
+                        <h3>Quality Management</h3>
+                        <canvas id="chartEvent1"></canvas>
+                        <div id="totalEvent1" class="total-badge">Total: -- / 30</div>
+                    </div>
+                    <div class="chart-container">
+                        <h3>New Product Development</h3>
+                        <canvas id="chartEvent2"></canvas>
+                        <div id="totalEvent2" class="total-badge">Total: -- / 30</div>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Supply Chain Management</h3>
+                        <canvas id="chartEvent3"></canvas>
+                        <div id="totalEvent3" class="total-badge">Total: -- / 30</div>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Location Strategy</h3>
+                        <canvas id="chartEvent4"></canvas>
+                        <div id="totalEvent4" class="total-badge">Total: -- / 30</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Entry Modal -->
+    <div id="teacherModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal-btn" onclick="closeTeacherModal()" title="Close">&times;</button>
+            <h2 style="text-align:center; margin-bottom: 25px; color: var(--sidebar-bg);">Initiate Evaluation</h2>
+            <div class="form-group">
+                <label>Target Candidate (Teacher)</label>
+                <input type="text" id="teacherName" placeholder="Enter full name...">
+            </div>
+            <div class="form-group">
+                <label>Judicial Identification</label>
+                <select id="judgeNumber">
+                    <option value="1">Judge 1</option>
+                    <option value="2">Judge 2</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Assigned Event</label>
+                <input type="text" id="eventJudging" readonly style="background:#f7fafc; color: var(--text-muted); font-weight: 600;">
+            </div>
+            <div style="text-align:center; margin-top: 10px;">
+                <button class="btn-submit" onclick="handleSubmit()">Access Scoring Panel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjixP5J_-zQQX_MYl1TKDeZ8V3D_x8IafLiqBSpDx8mE1wW_JSgaOGZEMlcpVPSVoVtw/exec";
+
+        let charts = {};
+
+        function showNotification(msg, type = 'success') {
+            const toast = document.getElementById('notification');
+            toast.innerText = msg;
+            toast.style.background = type === 'success' ? '#48bb78' : '#f56565';
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        function openTeacherModal(eventName) {
+            document.getElementById('eventJudging').value = eventName;
+            document.getElementById('teacherModal').style.display = 'flex';
+        }
+
+        function closeTeacherModal() {
+            document.getElementById('teacherModal').style.display = 'none';
+        }
+
+        async function handleViewResults() {
+            document.getElementById('dashboardView').classList.remove('active');
+            document.getElementById('resultsView').classList.add('active');
+            
+            document.getElementById('resultsLoader').style.display = 'flex';
+            document.getElementById('resultsContent').style.display = 'none';
+
+            try {
+                const response = await fetch(SCRIPT_URL + "?action=getResults");
+                const data = await response.json();
+                
+                renderResultCharts(data);
+                
+                document.getElementById('resultsLoader').style.display = 'none';
+                document.getElementById('resultsContent').style.display = 'grid';
+            } catch (err) {
+                console.error(err);
+                showNotification("Network error. Could not fetch results.", "error");
+            }
+        }
+
+        function renderResultCharts(data) {
+            const events = [
+                { id: '1', name: 'Quality Management' },
+                { id: '2', name: 'New Product Development' },
+                { id: '3', name: 'Supply Chain Management' },
+                { id: '4', name: 'Location Strategy' }
+            ];
+
+            events.forEach(evt => {
+                const evtData = data[`event${evt.id}`];
+                const ctx = document.getElementById(`chartEvent${evt.id}`).getContext('2d');
+                
+                document.getElementById(`totalEvent${evt.id}`).innerText = `Total: ${evtData.total} / 30`;
+
+                if (charts[evt.id]) charts[evt.id].destroy();
+
+                charts[evt.id] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['C1', 'C2', 'C3'],
+                        datasets: [{
+                            data: evtData.criteria,
+                            backgroundColor: ['#4da6ff', '#3182ce', '#2b6cb0'],
+                            borderRadius: 6,
+                            barThickness: 25
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { 
+                            y: { beginAtZero: true, max: 10, ticks: { stepSize: 2 } },
+                            x: { grid: { display: false } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            });
+        }
+
+        function handleSubmit() {
+            const name = document.getElementById('teacherName').value;
+            const judge = document.getElementById('judgeNumber').value;
+            if (!name.trim()) { showNotification("Please enter target candidate name.", "error"); return; }
+            
+            document.getElementById('displayEvent').innerText = document.getElementById('eventJudging').value;
+            document.getElementById('displayTeacher').innerText = `Evaluating: ${name}`;
+            document.getElementById('displayJudgeBadge').innerText = "Judge " + judge;
+            
+            document.getElementById('teacherModal').style.display = 'none';
+            document.getElementById('dashboardView').classList.remove('active');
+            document.getElementById('pollingView').classList.add('active');
+            resetRatings();
+        }
+
+        function setRating(groupId, value) {
+            const group = document.getElementById(groupId);
+            group.querySelectorAll('.rating-box').forEach((box, i) => {
+                box.classList.toggle('selected', i < value);
+            });
+        }
+
+        function resetRatings() {
+            document.querySelectorAll('.rating-box').forEach(box => {
+                box.classList.remove('selected');
+            });
+        }
+
+        async function finishPolling() {
+            const scores = {
+                teacher: document.getElementById('displayTeacher').innerText.replace('Evaluating: ', ''),
+                judge: document.getElementById('displayJudgeBadge').innerText.split(' ')[1],
+                event: document.getElementById('displayEvent').innerText,
+                criteria1: document.querySelectorAll('#crit1 .selected').length,
+                criteria2: document.querySelectorAll('#crit2 .selected').length,
+                criteria3: document.querySelectorAll('#crit3 .selected').length
+            };
+
+            if (scores.criteria1 === 0 || scores.criteria2 === 0 || scores.criteria3 === 0) {
+                showNotification("All scoring criteria are required.", "error");
+                return;
+            }
+
+            const btn = document.getElementById('submitScoresBtn');
+            btn.disabled = true;
+            btn.innerText = "Transmitting Data...";
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(scores)
+                });
+
+                showNotification("Transmission successful.");
+                setTimeout(() => showDashboard(), 1500);
+            } catch (error) {
+                showNotification("Transmission error. Retry recommended.", "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Submit Final Scores";
+            }
+        }
+
+        function showDashboard() {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('dashboardView').classList.add('active');
+            document.getElementById('teacherName').value = '';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('teacherModal')) { closeTeacherModal(); }
+        }
+    </script>
+</body>
+</html>
