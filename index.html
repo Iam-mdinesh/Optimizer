@@ -1,0 +1,662 @@
+<!-- Chosen Palette: Earth & Innovation (Warm Neutrals) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimizer - Operations & Management Portal</title>
+    <!-- Chart.js for Results Visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4da6ff;
+            --primary-dark: #3182ce;
+            --bg-neutral: #e2e8f0; 
+            --sidebar-bg: #374151; 
+            --text-main: #1f2937;
+            --text-muted: #64748b;
+            --card-border: #cbd5e1;
+            --winner-gold: #fbbf24;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-neutral);
+            color: var(--text-main);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Login Page Styles */
+        #loginView {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            background-color: var(--bg-neutral);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .login-card {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            padding: 60px 50px;
+            border-radius: 28px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            animation: fadeIn 0.5s ease;
+            text-align: center;
+        }
+
+        .login-logo {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 5px;
+            letter-spacing: -2px;
+        }
+
+        .login-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 45px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 0.9rem;
+        }
+
+        /* App Container */
+        .app-container {
+            display: none; 
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background-color: #f8fafc;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        aside {
+            width: 300px;
+            background-color: var(--sidebar-bg);
+            color: #ffffff;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .brand-name {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+            color: var(--primary);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 300;
+            color: #94a3b8;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+        }
+
+        main {
+            flex-grow: 1;
+            padding: 40px 60px;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header-wrapper {
+            text-align: center;
+            width: 100%;
+            margin-bottom: 50px;
+        }
+
+        .events-header {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--sidebar-bg);
+            border-bottom: 4px solid var(--primary);
+            display: inline-block;
+            padding-bottom: 10px;
+            margin: 0;
+        }
+
+        .operations-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border: 2px solid var(--card-border);
+            border-radius: 12px;
+            padding: 40px;
+            height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary);
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            background-color: #eff6ff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--primary-dark);
+        }
+
+        .card-title { font-size: 1.6rem; font-weight: 700; color: #1e293b; line-height: 1.2; }
+
+        .btn-result {
+            background-color: var(--primary);
+            color: white;
+            padding: 16px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(77, 166, 255, 0.2);
+        }
+
+        /* Winner Dashboard Banner */
+        .winner-banner {
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 25px -5px rgba(251, 191, 36, 0.4);
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .winner-info h2 { margin: 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; }
+        .winner-info h1 { margin: 5px 0 0 0; font-size: 2.2rem; font-weight: 900; }
+        .winner-score { text-align: right; }
+        .winner-score .score-val { font-size: 3rem; font-weight: 900; line-height: 1; }
+        .winner-score .score-label { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; opacity: 0.8; }
+
+        .polling-container { text-align: center; max-width: 700px; margin: 0 auto; }
+        
+        .judge-badge {
+            display: inline-block; 
+            background: #eff6ff; 
+            color: var(--primary-dark);
+            padding: 8px 20px; 
+            border-radius: 30px; 
+            font-weight: 800;
+            font-size: 0.9rem; 
+            margin-bottom: 20px; 
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .polling-title { font-size: 3.5rem; color: var(--sidebar-bg); margin: 0 0 10px 0; font-weight: 900; letter-spacing: -1px;}
+        .polling-subtitle { font-size: 2rem; color: #94a3b8; margin-bottom: 34px; font-weight: 300; }
+
+        .criteria-row {
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            margin-bottom: 24px; 
+            background: #ffffff; 
+            padding: 29px 44px; 
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .criteria-label { font-size: 1.2rem; font-weight: 600; color: #334155; }
+
+        .rating-group { display: flex; gap: 16px; }
+        .rating-box {
+            width: 48px;
+            height: 48px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #475569;
+        }
+
+        .rating-box.selected {
+            background-color: var(--sidebar-bg);
+            border-color: var(--sidebar-bg);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .comment-area {
+            margin-top: 34px;
+            text-align: left;
+            background: #ffffff;
+            padding: 29px 34px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .comment-box {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #cbd5e1;
+            background: #f8fafc;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .teacher-display { margin-top: 40px; font-size: 1.4rem; color: #64748b; font-style: italic; font-weight: 500; }
+
+        .btn-submit { 
+            background-color: var(--sidebar-bg); 
+            color: white; 
+            padding: 18px 50px; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-weight: 800; 
+            font-size: 1.2rem; 
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .btn-back { background: white; border: 2px solid #e2e8f0; padding: 10px 20px; border-radius: 8px; cursor: pointer; color: #475569; font-weight: 700; margin-bottom: 25px;}
+
+        .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; }
+        .chart-container { 
+            background: #fff; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 12px; 
+            padding: 30px; 
+            text-align: center;
+            height: 350px; /* Specific height for Pie charts */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .total-badge { margin-top: 20px; font-weight: 800; color: var(--sidebar-bg); font-size: 1.2rem;}
+
+        .form-group { margin-bottom: 30px; display: flex; flex-direction: column; gap: 12px; text-align: left;}
+        .form-group label { font-weight: 700; color: #334155; font-size: 1.1rem;}
+        .form-group input, .form-group select { padding: 16px; border: 2px solid #cbd5e1; border-radius: 10px; font-size: 1.05rem; width: 100%; box-sizing: border-box; background: #f8fafc; transition: all 0.2s; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); background: white; }
+
+        #notification {
+            position: fixed; top: 20px; right: 20px; padding: 15px 25px;
+            border-radius: 8px; color: white; display: none; z-index: 9999;
+            font-weight: 600;
+        }
+
+        @media (max-width: 900px) {
+            .app-container { flex-direction: column; }
+            aside { width: 100%; padding: 30px; }
+            main { padding: 30px 20px; }
+            .operations-grid, .results-grid { grid-template-columns: 1fr; }
+            .login-card { width: 100%; padding: 40px 25px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="notification"></div>
+
+    <!-- STARTING PAGE: Login View -->
+    <div id="loginView">
+        <div class="login-card">
+            <div class="login-logo">Optimizer</div>
+            <div class="login-subtitle">Operations Portal</div>
+            
+            <div class="form-group">
+                <label>Teacher Name</label>
+                <input type="text" id="teacherName" placeholder="Enter teacher's name...">
+            </div>
+            
+            <div class="form-group">
+                <label>Identify Judge</label>
+                <select id="judgeNumber">
+                    <option value="1">Judge 1</option>
+                    <option value="2">Judge 2</option>
+                </select>
+            </div>
+
+            <button class="btn-submit" style="margin-top: 15px;" onclick="handleLogin()">Login to Dashboard</button>
+        </div>
+    </div>
+
+    <!-- MAIN APP: Hidden initially -->
+    <div class="app-container" id="appInterface">
+        <aside>
+            <div class="brand-name">Optimizer</div>
+            <div class="section-title">Operations</div>
+            <p style="margin-top: 50px; line-height: 1.8; color: #cbd5e1; font-size: 1.05rem;">Strategic scoring and evaluation portal for management excellence.</p>
+            <button class="btn-back" style="margin-top: auto; border: none; background: rgba(255,255,255,0.1); color: white;" onclick="logout()">Logout</button>
+        </aside>
+
+        <main>
+            <!-- Dashboard View -->
+            <div id="dashboardView" class="view">
+                <div class="header-wrapper"><h1 class="events-header">Events</h1></div>
+                <div class="operations-grid">
+                    <div class="card" onclick="startScoring('CASH CRUSHER')">
+                        <div class="card-icon">C</div>
+                        <div class="card-title">CASH <br> CRUSHER</div>
+                    </div>
+                    <div class="card" onclick="startScoring('CLUE CARTER')">
+                        <div class="card-icon">C</div>
+                        <div class="card-title">CLUE <br> CARTER</div>
+                    </div>
+                    <div class="card" onclick="startScoring('SHOW THE FLOW')">
+                        <div class="card-icon">S</div>
+                        <div class="card-title">SHOW <br> THE FLOW</div>
+                    </div>
+                    <div class="card" onclick="startScoring('NAACH OPS')">
+                        <div class="card-icon">N</div>
+                        <div class="card-title">NAACH <br> OPS</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 60px; text-align: center; padding-top: 40px; border-top: 2px solid var(--card-border);">
+                    <button class="btn-result" onclick="handleViewResults()">View Results Portfolio</button>
+                </div>
+            </div>
+
+            <!-- Polling View -->
+            <div id="pollingView" class="view">
+                <button class="btn-back" onclick="showDashboard()">← Back to Events</button>
+                <div class="polling-container">
+                    <div id="displayJudgeBadge" class="judge-badge">Judge 1</div>
+                    <h1 id="displayEvent" class="polling-title">EVENT NAME</h1>
+                    <h3 id="displayScoreTitle" class="polling-subtitle">Scoring & Feedback</h3>
+
+                    <!-- Division selection -->
+                    <div class="criteria-row">
+                        <span class="criteria-label">Division</span>
+                        <select id="pollingDivision" style="padding: 10px; border: 2px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-weight: 600; color: #334155; outline: none;">
+                            <option value="Division A">Division A</option>
+                            <option value="Division B">Division B</option>
+                            <option value="Division C">Division C</option>
+                            <option value="Division D">Division D</option>
+                        </select>
+                    </div>
+
+                    <div class="criteria-row">
+                        <span class="criteria-label">1) Marks</span>
+                        <div class="rating-group" id="crit1">
+                            <div class="rating-box" onclick="setRating('crit1', 1)">1</div>
+                            <div class="rating-box" onclick="setRating('crit1', 2)">2</div>
+                            <div class="rating-box" onclick="setRating('crit1', 3)">3</div>
+                            <div class="rating-box" onclick="setRating('crit1', 4)">4</div>
+                            <div class="rating-box" onclick="setRating('crit1', 5)">5</div>
+                        </div>
+                    </div>
+
+                    <div class="comment-area">
+                        <label style="font-weight: 700; margin-bottom: 10px; display: block;">Additional Feedback</label>
+                        <textarea id="judgeComments" class="comment-box" placeholder="Enter evaluation comments here..."></textarea>
+                    </div>
+
+                    <div style="margin-top: 40px;">
+                        <button id="submitScoresBtn" class="btn-submit" onclick="finishPolling()">Submit Final Scores</button>
+                    </div>
+
+                    <div id="displayTeacher" class="teacher-display">Teacher Name</div>
+                </div>
+            </div>
+
+            <!-- Results View -->
+            <div id="resultsView" class="view">
+                <button class="btn-back" onclick="showDashboard()">← Back</button>
+                <div class="header-wrapper"><h1 class="events-header">Results Portfolio</h1></div>
+                
+                <!-- Winner Dashboard Banner -->
+                <div id="winnerBanner" class="winner-banner" style="display: none;">
+                    <div class="winner-info">
+                        <h2>🏆 Overall Event Winner</h2>
+                        <h1 id="winnerName">TBA</h1>
+                    </div>
+                    <div class="winner-score">
+                        <div id="winnerPoints" class="score-val">0</div>
+                        <div class="score-label">Total Points</div>
+                    </div>
+                </div>
+
+                <div id="resultsContent" class="results-grid">
+                    <div class="chart-container"><canvas id="chartEvent1"></canvas><div id="totalEvent1" class="total-badge"></div></div>
+                    <div class="chart-container"><canvas id="chartEvent2"></canvas><div id="totalEvent2" class="total-badge"></div></div>
+                    <div class="chart-container"><canvas id="chartEvent3"></canvas><div id="totalEvent3" class="total-badge"></div></div>
+                    <div class="chart-container"><canvas id="chartEvent4"></canvas><div id="totalEvent4" class="total-badge"></div></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // BACKEND URL
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzlJkzNRDxkl_yMPpT1vhScFFLEWjthuvF-x-fzw8RepOxltos8OqJF5ODr1wMMTFM5fA/exec";
+        let charts = {};
+        let activeSessionData = null;
+
+        function showNotification(msg, type = 'success') {
+            const toast = document.getElementById('notification');
+            toast.innerText = msg;
+            toast.style.background = type === 'success' ? '#10b981' : '#ef4444';
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        function handleLogin() {
+            const name = document.getElementById('teacherName').value;
+            const judge = document.getElementById('judgeNumber').value;
+            
+            if (!name) { showNotification("Please enter teacher's name.", "error"); return; }
+            
+            activeSessionData = {
+                teacher: name.toUpperCase(),
+                judge: judge
+            };
+
+            document.getElementById('loginView').style.display = 'none';
+            document.getElementById('appInterface').style.display = 'flex';
+            showDashboard();
+            showNotification("Logged in successfully!");
+        }
+
+        function logout() {
+            activeSessionData = null;
+            document.getElementById('loginView').style.display = 'flex';
+            document.getElementById('appInterface').style.display = 'none';
+            document.getElementById('teacherName').value = '';
+        }
+
+        function showDashboard() {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('dashboardView').classList.add('active');
+        }
+
+        function startScoring(eventName) {
+            document.getElementById('displayTeacher').innerText = `${activeSessionData.teacher}`;
+            document.getElementById('displayJudgeBadge').innerText = "Judge " + activeSessionData.judge;
+            document.getElementById('displayEvent').innerText = eventName;
+            
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('pollingView').classList.add('active');
+            
+            document.getElementById('judgeComments').value = '';
+            resetRatings();
+            
+            activeSessionData.currentEvent = eventName;
+        }
+
+        function setRating(groupId, value) {
+            const group = document.getElementById(groupId);
+            group.querySelectorAll('.rating-box').forEach((box, i) => {
+                box.classList.toggle('selected', i === value - 1);
+            });
+        }
+
+        function resetRatings() {
+            document.querySelectorAll('.rating-box').forEach(box => box.classList.remove('selected'));
+        }
+
+        async function finishPolling() {
+            const division = document.getElementById('pollingDivision').value;
+            const scores = {
+                teacher: activeSessionData.teacher,
+                division: division, 
+                judge: activeSessionData.judge,
+                event: activeSessionData.currentEvent,
+                criteria1: document.querySelectorAll('#crit1 .selected').length > 0 ? Array.from(document.querySelectorAll('#crit1 .rating-box')).indexOf(document.querySelector('#crit1 .selected')) + 1 : 0,
+                comment: document.getElementById('judgeComments').value
+            };
+
+            if (scores.criteria1 === 0) {
+                showNotification("Please select a score for Marks.", "error"); return;
+            }
+
+            const btn = document.getElementById('submitScoresBtn');
+            btn.disabled = true; btn.innerText = "Transmitting...";
+
+            try {
+                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(scores) });
+                showNotification("Submitted successfully!");
+                resetRatings();
+                document.getElementById('judgeComments').value = '';
+                
+            } catch (e) { 
+                showNotification("Error submitting data.", "error"); 
+            } finally { 
+                btn.disabled = false; btn.innerText = "Submit Final Scores"; 
+            }
+        }
+
+        async function handleViewResults() {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('resultsView').classList.add('active');
+            try {
+                const res = await fetch(SCRIPT_URL + "?action=getResults");
+                const data = await res.json();
+                renderCharts(data);
+                determineWinner(data);
+            } catch (e) { 
+                showNotification("Live data sync unavailable.", "error"); 
+                renderCharts({
+                    event1: { total: 0, name: "CASH CRUSHER" },
+                    event2: { total: 0, name: "CLUE CARTER" },
+                    event3: { total: 0, name: "SHOW THE FLOW" },
+                    event4: { total: 0, name: "NAACH OPS" }
+                });
+            }
+        }
+
+        function determineWinner(data) {
+            let maxTotal = -1;
+            let winner = null;
+            if(!data) return;
+
+            for (let key in data) {
+                if (data[key] && data[key].total > maxTotal) {
+                    maxTotal = data[key].total;
+                    winner = data[key];
+                }
+            }
+
+            if (winner && maxTotal > 0) {
+                document.getElementById('winnerBanner').style.display = 'flex';
+                document.getElementById('winnerName').innerText = winner.name;
+                document.getElementById('winnerPoints').innerText = winner.total;
+            } else {
+                document.getElementById('winnerBanner').style.display = 'none';
+            }
+        }
+
+        function renderCharts(data) {
+            const ids = ['1','2','3','4'];
+            const eventNames = ["CASH CRUSHER", "CLUE CARTER", "SHOW THE FLOW", "NAACH OPS"];
+            const colors = ['#4da6ff', '#fbbf24', '#10b981', '#f43f5e'];
+            
+            // Calculate grand total for percentages
+            let grandTotal = 0;
+            for(let key in data) grandTotal += (data[key].total || 0);
+
+            ids.forEach((id, index) => {
+                const ctx = document.getElementById(`chartEvent${id}`).getContext('2d');
+                if(charts[id]) charts[id].destroy();
+                
+                const eventData = data[`event${id}`] || { total: 0 };
+                const val = eventData.total || 0;
+                const remainder = Math.max(0, grandTotal - val);
+
+                charts[id] = new Chart(ctx, {
+                    type: 'doughnut', // Pie variation for modern UI
+                    data: { 
+                        labels: [eventNames[index], 'Rest of Events'], 
+                        datasets:[{ 
+                            data: [val, remainder === 0 && val === 0 ? 1 : remainder], 
+                            backgroundColor: [colors[index], '#f1f5f9'],
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }] 
+                    },
+                    options: { 
+                        plugins: { 
+                            legend: { display: true, position: 'bottom', labels: { boxWidth: 12, padding: 15 } },
+                            tooltip: { enabled: true }
+                        },
+                        maintainAspectRatio: false,
+                        cutout: '70%' // Hole size
+                    }
+                });
+                document.getElementById(`totalEvent${id}`).innerText = `Aggregate Sum: ${val}`;
+            });
+        }
+    </script>
+</body>
+</html>
